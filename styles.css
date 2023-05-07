@@ -1,0 +1,21 @@
+.songs-container {
+    display: inline-block;
+    background-color: rgba(1, 1, 1, 0.7);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    z-index: 9999;
+    overflow: auto;
+    height: auto;
+    width: auto;
+    column-count: 2;
+    column-gap: 5px;
+    position: absolute;
+    padding: 5px 5px 0 5px;
+    opacity: 1;
+}
+
+.song-block {
+    border: none;
+    display: block;
+    margin-bottom: 5px;
+}

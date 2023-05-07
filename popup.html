@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Extension Popup</title>
+    <style>
+        .popup-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #trackCountLabel {
+            white-space: nowrap;
+        }
+
+        #trackCountSelect {
+            width: 100px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <label for="trackCountSelect" id="trackCountLabel">Number of Tracks:</label>
+        <select id="trackCountSelect"></select>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

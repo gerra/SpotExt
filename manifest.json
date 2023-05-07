@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "SpotExt",
+  "description": "Base Level Extension",
+  "version": "1.0",
+  "permissions": ["contextMenus", "storage", "identity", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Title here"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    }
+  ]
+}
