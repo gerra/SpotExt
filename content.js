@@ -2,11 +2,11 @@ const songsContainer = document.createElement('div');
 songsContainer.className = "songs-container"
 
 // Event listener for mouseup event
-document.addEventListener('mouseup', () => {
+/*document.addEventListener('mouseup', () => {
     if (!window.getSelection().toString()) {
         songsContainer.remove()
     }
-});
+});*/
 
 chrome.runtime.onMessage.addListener((message) => {
     if (message.event === 'showTracks') {
