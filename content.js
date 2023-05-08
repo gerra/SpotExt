@@ -1,5 +1,23 @@
-const songsContainer = document.createElement('div');
+const songsOuterContainer = document.createElement('div')
+songsOuterContainer.className = 'songs-outer-container'
+
+const topPanel = document.createElement('div')
+topPanel.className = 'top-panel'
+
+const closeButton = document.createElement('div')
+closeButton.className = 'close-button'
+closeButton.textContent = 'Close'
+closeButton.addEventListener('click', () => {
+    removeSongsPopup()
+})
+
+const songsContainer = document.createElement('div')
 songsContainer.className = "songs-container"
+
+topPanel.appendChild(closeButton)
+
+songsOuterContainer.appendChild(topPanel)
+songsOuterContainer.appendChild(songsContainer)
 
 // Event listener for mouseup event
 /*document.addEventListener('mouseup', () => {
@@ -10,25 +28,25 @@ songsContainer.className = "songs-container"
 
 chrome.runtime.onMessage.addListener((message) => {
     if (message.event === 'showTracks') {
-        removeSongsContainer()
+        removeSongsPopup()
 
         const songIds = message.songIds
         inflatePlayers(songsContainer, songIds);
 
         const selection = getSelectionCoordinates()
-        songsContainer.style.left = `${selection.x}px`
-        songsContainer.style.top = `${selection.y}px`
+        songsOuterContainer.style.left = `${selection.x}px`
+        songsOuterContainer.style.top = `${selection.y}px`
 
-        document.body.appendChild(songsContainer);
+        document.body.appendChild(songsOuterContainer);
     }
 });
 
 window.onbeforeunload = () => {
-    removeSongsContainer()
+    removeSongsPopup()
 }
 
-function removeSongsContainer() {
-    songsContainer.remove()
+function removeSongsPopup() {
+    songsOuterContainer.remove()
     songsContainer.replaceChildren();
 }
 

@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
   "name": "SpotExt",
-  "description": "Base Level Extension",
+  "description": "Extension to find top tracks by selected text",
   "version": "1.0",
   "permissions": ["contextMenus", "storage", "identity", "activeTab"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Title here"
+    "default_title": "TopTracks"
   },
   "background": {
     "service_worker": "background.js"
@@ -23,5 +23,9 @@
         "styles.css"
       ]
     }
-  ]
+  ],
+  "web_accessible_resources": [{
+    "matches": ["<all_urls>"],
+    "resources": ["icons/close_icon.svg"]
+  }]
 }

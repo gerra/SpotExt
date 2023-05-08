@@ -1,17 +1,22 @@
-.songs-container {
-    display: inline-block;
+.songs-outer-container {
+    position: absolute;
     background-color: rgba(1, 1, 1, 0.7);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    opacity: 1;
     border-radius: 5px;
     z-index: 9999;
+    display: flex;
+    flex-direction: column;
+}
+
+.songs-container {
+    display: inline-block;
     overflow: auto;
     height: auto;
     width: auto;
     column-count: 2;
     column-gap: 5px;
-    position: absolute;
     padding: 5px 5px 0 5px;
-    opacity: 1;
 }
 
 .song-block {
@@ -20,4 +25,24 @@
     margin-bottom: 5px;
     background-color: rgba(1, 1, 1, 0);
     border-radius: 0;
+}
+
+.top-panel {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.close-button {
+    top: 5px;
+    right: 5px;
+    background-color: rgba(100%, 9%, 0%, 70%);
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-left: 5px;
+    padding: 3px;
 }
