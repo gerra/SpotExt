@@ -98,18 +98,17 @@ class SpotifyService {
     }
 }
 
-
 getTracksCountFromStorage()
     .then(tracksCount => {
         chrome.contextMenus.create({
             id: TOP_TRACKS_CONTEXT_MENU_ID,
             title: contextMenuTitle(tracksCount),
-            contexts: ["selection"]
+            contexts: ["selection"],
         });
     })
 
 function contextMenuTitle(count) {
-    return `Show top ${count} tracks`
+    return `Show Top ${count} Tracks`
 }
 
 chrome.contextMenus.onClicked.addListener((info) => {
