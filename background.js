@@ -171,7 +171,9 @@ function updateContextMenu(id, enabled, trackCountKey, titleFunction) {
                 });
             })
     } else {
-        chrome.contextMenus.remove(id, () => {})
+        chrome.contextMenus.remove(id, () => {
+            chrome.runtime.lastError // to ignore
+        })
     }
 }
 
