@@ -6,10 +6,16 @@ const ARTIST_TRACKS_CONTEXT_MENU_ID = "top_artist_tracks_context_menu"
 const TRACKS_CONTEXT_MENU_ID = "top_tracks_context_menu"
 
 const KEY_ARTIST_TRACK_COUNT = 'artistTopTrackCount'
-const KEY_TRACK_COUNT = 'topTrackCount'
-
+const KEY_ARTIST_TRACKS_ENABLED = 'artistTopTracksEnabled'
+const ARTIST_TRACKS_ENABLED_DEFAULT_VALUE = true
 const EVENT_ARTIST_TRACK_COUNT_CHANGED = 'topArtistTrackCountChanged'
+const EVENT_ARTIST_TRACK_ENABLED_CHANGED = 'topArtistEnabledChanged'
+
+const KEY_TRACK_COUNT = 'topTrackCount'
+const KEY_TRACKS_ENABLED = 'topTracksEnabled'
+const TRACKS_ENABLED_DEFAULT_VALUE = false
 const EVENT_TRACK_COUNT_CHANGED = 'topTrackCountChanged'
+const EVENT_TRACK_ENABLED_CHANGED = 'topTrackEnabledChanged'
 
 class SpotifyAuthorizator {
     auth() {
@@ -130,18 +136,39 @@ class SpotifyService {
 
 const spotifyService = new SpotifyService()
 
-initContextMenuItem(ARTIST_TRACKS_CONTEXT_MENU_ID, KEY_ARTIST_TRACK_COUNT, artistTracksContextMenuTitle)
-initContextMenuItem(TRACKS_CONTEXT_MENU_ID, KEY_TRACK_COUNT, tracksContextMenuTitle)
+initContextMenuItem(
+    ARTIST_TRACKS_CONTEXT_MENU_ID,
+    KEY_ARTIST_TRACKS_ENABLED,
+    ARTIST_TRACKS_ENABLED_DEFAULT_VALUE,
+    KEY_ARTIST_TRACK_COUNT,
+    artistTracksContextMenuTitle
+)
+initContextMenuItem(
+    TRACKS_CONTEXT_MENU_ID,
+    KEY_TRACKS_ENABLED,
+    TRACKS_ENABLED_DEFAULT_VALUE,
+    KEY_TRACK_COUNT,
+    tracksContextMenuTitle
+)
 
-function initContextMenuItem(id, key, titleFunction) {
-    getTracksCountFromStorage(key)
-        .then(tracksCount => {
-            chrome.contextMenus.create({
-                id: id,
-                title: titleFunction(tracksCount),
-                contexts: ["selection"],
-            });
-        })
+function initContextMenuItem(id, enabledKey, defaultEnabled, trackCountKey, titleFunction) {
+    getEnabledFromStorage(enabledKey, defaultEnabled)
+        .then(enabled => updateContextMenu(id, enabled, trackCountKey, titleFunction))
+}
+
+function updateContextMenu(id, enabled, trackCountKey, titleFunction) {
+    if (enabled) {
+        getTracksCountFromStorage(trackCountKey)
+            .then(tracksCount => {
+                chrome.contextMenus.create({
+                    id: id,
+                    title: titleFunction(tracksCount),
+                    contexts: ["selection"],
+                });
+            })
+    } else {
+        chrome.contextMenus.remove(id, () => {})
+    }
 }
 
 function artistTracksContextMenuTitle(count) {
@@ -161,6 +188,11 @@ chrome.contextMenus.onClicked.addListener((info) => {
 });
 
 chrome.runtime.onMessage.addListener((message) => {
+    tryHandleCountChange(message)
+    tryHandleEnableChange(message)
+});
+
+function tryHandleCountChange(message) {
     let id = null;
     let titleFunction = null;
     switch (message.event) {
@@ -179,17 +211,45 @@ chrome.runtime.onMessage.addListener((message) => {
             title: titleFunction(trackCount)
         })
     }
-});
+}
+
+function tryHandleEnableChange(message) {
+    switch (message.event) {
+        case EVENT_ARTIST_TRACK_ENABLED_CHANGED:
+            updateContextMenu(
+                ARTIST_TRACKS_CONTEXT_MENU_ID,
+                message.enabled,
+                KEY_ARTIST_TRACK_COUNT,
+                artistTracksContextMenuTitle
+            )
+            break
+        case EVENT_TRACK_ENABLED_CHANGED:
+            updateContextMenu(
+                TRACKS_CONTEXT_MENU_ID,
+                message.enabled,
+                KEY_TRACK_COUNT,
+                tracksContextMenuTitle
+            )
+            break
+    }
+}
 
 function getTracksCountFromStorage(trackCountKey) {
+    return getStorageValuePromise(trackCountKey, TOP_TRACKS_DEFAULT_COUNT)
+}
+
+function getEnabledFromStorage(enabledKey, defaultEnabled) {
+    return getStorageValuePromise(enabledKey, defaultEnabled)
+}
+
+function getStorageValuePromise(key, defValue) {
     return new Promise((resolve) => {
         chrome.storage.sync.get(
-            {[trackCountKey]: TOP_TRACKS_DEFAULT_COUNT},
+            {[key]: defValue},
             function (result) {
-                resolve(result[trackCountKey])
+                resolve(result[key])
             });
     })
-
 }
 
 function onTopTracksShowClicked(trackCountKey, selectionText, topTracksFunction) {

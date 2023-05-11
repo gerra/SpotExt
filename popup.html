@@ -23,17 +23,21 @@
 <div>
 
     <div class="track-count-container">
-        <label class="track-count-label"
-               for="artistTrackCountSelect"
-               id="artistTrackCountLabel">Number of Artist Tracks:</label>
-        <select class="track-count-select" id="artistTrackCountSelect"></select>
+        <div id="artistTrackCountContainer" class="track-count-label">
+            <label id="artistTrackCountLabel"
+                   for="artistTrackCountSelect">Number of Artist Tracks:</label>
+            <select class="track-count-select" id="artistTrackCountSelect"></select>
+        </div>
+        <input type="checkbox" id="artistTracksCheckbox">
     </div>
 
     <div class="track-count-container">
-        <label class="track-count-label"
-               for="trackCountSelect"
-               id="trackCountLabel">Number of Tracks:</label>
-        <select class="track-count-select" id="trackCountSelect"></select>
+        <div id="trackCountContainer" class="track-count-label">
+            <label id="trackCountLabel"
+                   for="trackCountSelect">Number of Tracks:</label>
+            <select class="track-count-select" id="trackCountSelect"></select>
+        </div>
+        <input type="checkbox" id="tracksCheckBox">
     </div>
 
 </div>
