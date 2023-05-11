@@ -17,27 +17,39 @@
             width: 100px;
             margin-left: 10px;
         }
+
+        .track-options-container {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
 <div>
 
     <div class="track-count-container">
-        <div id="artistTrackCountContainer" class="track-count-label">
-            <label id="artistTrackCountLabel"
-                   for="artistTrackCountSelect">Number of Artist Tracks:</label>
+        <label class="track-count-label"
+               id="artistTrackCountLabel"
+               for="artist_track_options_container"
+        >Number of Artist Tracks:</label>
+
+        <div id="artist_track_options_container" class="track-options-container">
             <select class="track-count-select" id="artistTrackCountSelect"></select>
+            <input type="checkbox" id="artistTracksCheckbox">
         </div>
-        <input type="checkbox" id="artistTracksCheckbox">
     </div>
 
     <div class="track-count-container">
-        <div id="trackCountContainer" class="track-count-label">
-            <label id="trackCountLabel"
-                   for="trackCountSelect">Number of Tracks:</label>
+        <label class="track-count-label"
+               id="trackCountLabel"
+               for="track_options_container"
+        >Number of Tracks:</label>
+
+        <div id="track_options_container" class="track-options-container">
             <select class="track-count-select" id="trackCountSelect"></select>
+            <input type="checkbox" id="tracksCheckBox">
         </div>
-        <input type="checkbox" id="tracksCheckBox">
     </div>
 
 </div>
