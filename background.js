@@ -136,20 +136,24 @@ class SpotifyService {
 
 const spotifyService = new SpotifyService()
 
-initContextMenuItem(
-    ARTIST_TRACKS_CONTEXT_MENU_ID,
-    KEY_ARTIST_TRACKS_ENABLED,
-    ARTIST_TRACKS_ENABLED_DEFAULT_VALUE,
-    KEY_ARTIST_TRACK_COUNT,
-    artistTracksContextMenuTitle
-)
-initContextMenuItem(
-    TRACKS_CONTEXT_MENU_ID,
-    KEY_TRACKS_ENABLED,
-    TRACKS_ENABLED_DEFAULT_VALUE,
-    KEY_TRACK_COUNT,
-    tracksContextMenuTitle
-)
+initContextMenuItems()
+function initContextMenuItems() {
+    chrome.contextMenus.removeAll()
+    initContextMenuItem(
+        ARTIST_TRACKS_CONTEXT_MENU_ID,
+        KEY_ARTIST_TRACKS_ENABLED,
+        ARTIST_TRACKS_ENABLED_DEFAULT_VALUE,
+        KEY_ARTIST_TRACK_COUNT,
+        artistTracksContextMenuTitle
+    )
+    initContextMenuItem(
+        TRACKS_CONTEXT_MENU_ID,
+        KEY_TRACKS_ENABLED,
+        TRACKS_ENABLED_DEFAULT_VALUE,
+        KEY_TRACK_COUNT,
+        tracksContextMenuTitle
+    )
+}
 
 function initContextMenuItem(id, enabledKey, defaultEnabled, trackCountKey, titleFunction) {
     getEnabledFromStorage(enabledKey, defaultEnabled)
@@ -216,20 +220,8 @@ function tryHandleCountChange(message) {
 function tryHandleEnableChange(message) {
     switch (message.event) {
         case EVENT_ARTIST_TRACK_ENABLED_CHANGED:
-            updateContextMenu(
-                ARTIST_TRACKS_CONTEXT_MENU_ID,
-                message.enabled,
-                KEY_ARTIST_TRACK_COUNT,
-                artistTracksContextMenuTitle
-            )
-            break
         case EVENT_TRACK_ENABLED_CHANGED:
-            updateContextMenu(
-                TRACKS_CONTEXT_MENU_ID,
-                message.enabled,
-                KEY_TRACK_COUNT,
-                tracksContextMenuTitle
-            )
+            initContextMenuItems()
             break
     }
 }
