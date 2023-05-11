@@ -1,4 +1,5 @@
 build:
-	rm -f .out/out.zip
+	rm -f .out/spotext.zip
+	mkdir -p ".out"
     # -r – recursive ; -X – ignore OS-specific files ; -9 – the slowest but effective compression
-	zip -r -X -9 .out/out.zip . -x@.crxignore
+	zip -r -X -9 .out/spotext.zip . -x@.crxignore
