@@ -3,26 +3,40 @@
 <head>
     <title>My Extension Popup</title>
     <style>
-        .popup-container {
+        .track-count-container {
             display: flex;
             align-items: center;
+            margin-bottom: 5px;
         }
 
-        #trackCountLabel {
+        .track-count-label {
             white-space: nowrap;
         }
 
-        #trackCountSelect {
+        .track-count-select {
             width: 100px;
             margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="popup-container">
-        <label for="trackCountSelect" id="trackCountLabel">Number of Tracks:</label>
-        <select id="trackCountSelect"></select>
+<div>
+
+    <div class="track-count-container">
+        <label class="track-count-label"
+               for="artistTrackCountSelect"
+               id="artistTrackCountLabel">Number of Artist Tracks:</label>
+        <select class="track-count-select" id="artistTrackCountSelect"></select>
     </div>
-    <script src="popup.js"></script>
+
+    <div class="track-count-container">
+        <label class="track-count-label"
+               for="trackCountSelect"
+               id="trackCountLabel">Number of Tracks:</label>
+        <select class="track-count-select" id="trackCountSelect"></select>
+    </div>
+
+</div>
+<script src="popup.js"></script>
 </body>
 </html>

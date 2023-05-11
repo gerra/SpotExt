@@ -1,6 +1,15 @@
 const CLIENT_ID = "4702359ae40b439c9bb8f23d02364dc1"
-const TOP_TRACKS_CONTEXT_MENU_ID = "top_tracks_context_menu"
+
 const TOP_TRACKS_DEFAULT_COUNT = 5
+
+const ARTIST_TRACKS_CONTEXT_MENU_ID = "top_artist_tracks_context_menu"
+const TRACKS_CONTEXT_MENU_ID = "top_tracks_context_menu"
+
+const KEY_ARTIST_TRACK_COUNT = 'artistTopTrackCount'
+const KEY_TRACK_COUNT = 'topTrackCount'
+
+const EVENT_ARTIST_TRACK_COUNT_CHANGED = 'topArtistTrackCountChanged'
+const EVENT_TRACK_COUNT_CHANGED = 'topTrackCountChanged'
 
 class SpotifyAuthorizator {
     auth() {
@@ -39,6 +48,7 @@ class SpotifyService {
 
     constructor() {
         this.authorizator = new SpotifyAuthorizator()
+
     }
 
     getTopTracksByArtist(artistName, count) {
@@ -47,7 +57,16 @@ class SpotifyService {
             .then(accessToken => this.getTopTracksByArtistWithAT(artistName, count, accessToken))
     }
 
+    getTopTracks(query, count) {
+        return this.authorizator
+            .auth()
+            .then(accessToken => this.querySpotify(query, 'track', count, accessToken))
+            .then(data => data.tracks.items)
+    }
+
     getTopTracksByArtistWithAT(artistName, count, accessToken) {
+        console.log(artistName + ' ' + count)
+
         const artistIdUrl = new URL('/v1/search', 'https://api.spotify.com')
         const artistIdSearchParams = new URLSearchParams({
             'q': artistName,
@@ -56,8 +75,7 @@ class SpotifyService {
         })
         artistIdUrl.search = artistIdSearchParams.toString()
 
-        const artistIdPromise = fetch(artistIdUrl.href, this.fetchInit(accessToken))
-            .then(response => response.json())
+        const artistIdPromise = this.querySpotify(artistName, 'artist', 1, accessToken)
             .then(data => data.artists.items[0].id)
 
         const countryUrl = new URL('/v1/me', 'https://api.spotify.com')
@@ -73,6 +91,18 @@ class SpotifyService {
                 console.log(`artistId: ${artistId}, country: ${country}`)
                 return this.getTopTracksByArtistIdWithAT(artistId, count, country, accessToken)
             })
+    }
+
+    querySpotify(query, type, limit, accessToken) {
+        const searchUrl = new URL('/v1/search', 'https://api.spotify.com')
+        const searchParams = new URLSearchParams({
+            'q': query,
+            'type': type,
+            'limit': limit.toString()
+        })
+        searchUrl.search = searchParams.toString()
+        return fetch(searchUrl.href, this.fetchInit(accessToken))
+            .then(response => response.json())
     }
 
     getTopTracksByArtistIdWithAT(artistId, count, country, accessToken) {
@@ -98,51 +128,73 @@ class SpotifyService {
     }
 }
 
-getTracksCountFromStorage()
-    .then(tracksCount => {
-        chrome.contextMenus.create({
-            id: TOP_TRACKS_CONTEXT_MENU_ID,
-            title: contextMenuTitle(tracksCount),
-            contexts: ["selection"],
-        });
-    })
+const spotifyService = new SpotifyService()
 
-function contextMenuTitle(count) {
-    return `Show Top ${count} Tracks`
+initContextMenuItem(ARTIST_TRACKS_CONTEXT_MENU_ID, KEY_ARTIST_TRACK_COUNT, artistTracksContextMenuTitle)
+initContextMenuItem(TRACKS_CONTEXT_MENU_ID, KEY_TRACK_COUNT, tracksContextMenuTitle)
+
+function initContextMenuItem(id, key, titleFunction) {
+    getTracksCountFromStorage(key)
+        .then(tracksCount => {
+            chrome.contextMenus.create({
+                id: id,
+                title: titleFunction(tracksCount),
+                contexts: ["selection"],
+            });
+        })
+}
+
+function artistTracksContextMenuTitle(count) {
+    return `Show ${count} Tracks of Artist`
+}
+
+function tracksContextMenuTitle(count) {
+    return `Show ${count} Tracks`
 }
 
 chrome.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === TOP_TRACKS_CONTEXT_MENU_ID) {
-        onTopTracksShowClicked(info.selectionText)
+    if (info.menuItemId === ARTIST_TRACKS_CONTEXT_MENU_ID) {
+        onTopTracksShowClicked(KEY_ARTIST_TRACK_COUNT, info.selectionText, spotifyService.getTopTracksByArtist)
+    } else if (info.menuItemId === TRACKS_CONTEXT_MENU_ID) {
+        onTopTracksShowClicked(KEY_TRACK_COUNT, info.selectionText, spotifyService.getTopTracks)
     }
 });
 
 chrome.runtime.onMessage.addListener((message) => {
-    if (message.event === 'trackCountChanged') {
+    let id = null;
+    let titleFunction = null;
+    switch (message.event) {
+        case EVENT_ARTIST_TRACK_COUNT_CHANGED:
+            id = ARTIST_TRACKS_CONTEXT_MENU_ID
+            titleFunction = artistTracksContextMenuTitle
+            break
+        case EVENT_TRACK_COUNT_CHANGED:
+            id = TRACKS_CONTEXT_MENU_ID
+            titleFunction = tracksContextMenuTitle
+            break
+    }
+    if (id && titleFunction) {
         const trackCount = message.trackCount
-        chrome.contextMenus.update(TOP_TRACKS_CONTEXT_MENU_ID, {
-            title: contextMenuTitle(trackCount)
+        chrome.contextMenus.update(id, {
+            title: titleFunction(trackCount)
         })
     }
 });
 
-const spotifyService = new SpotifyService()
-
-function getTracksCountFromStorage() {
+function getTracksCountFromStorage(trackCountKey) {
     return new Promise((resolve) => {
         chrome.storage.sync.get(
-            {'trackCount': TOP_TRACKS_DEFAULT_COUNT},
+            {[trackCountKey]: TOP_TRACKS_DEFAULT_COUNT},
             function (result) {
-                const trackCount = result.trackCount;
-                resolve(trackCount)
-        });
+                resolve(result[trackCountKey])
+            });
     })
 
 }
 
-function onTopTracksShowClicked(selectionText) {
-    getTracksCountFromStorage()
-        .then(tracksCount => spotifyService.getTopTracksByArtist(selectionText, tracksCount))
+function onTopTracksShowClicked(trackCountKey, selectionText, topTracksFunction) {
+    getTracksCountFromStorage(trackCountKey)
+        .then(tracksCount => topTracksFunction.call(spotifyService, selectionText, tracksCount))
         .then(tracks => showTracks(tracks))
         .catch(e => console.error(e))
 }
