@@ -1,4 +1,4 @@
-.songs-outer-container {
+.spotext-songs-outer-container {
     position: absolute;
     background-color: rgba(1, 1, 1, 0.7);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
@@ -9,7 +9,7 @@
     flex-direction: column;
 }
 
-.songs-container {
+.spotext-songs-container {
     display: inline-block;
     overflow: auto;
     height: auto;
@@ -19,22 +19,22 @@
     padding: 5px 5px 0 5px;
 }
 
-.song-block {
+.spotext-song-block {
     border: none;
     display: block;
     margin-bottom: 5px;
-    background-color: rgba(1, 1, 1, 0);
+    background-color: transparent;
     border-radius: 0;
 }
 
-.top-panel {
+.spotext-top-panel {
     flex-grow: 1;
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
 
-.close-button {
+.spotext-close-button {
     top: 5px;
     right: 5px;
     background-color: rgba(100%, 9%, 0%, 70%);

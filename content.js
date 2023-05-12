@@ -1,18 +1,18 @@
 const songsOuterContainer = document.createElement('div')
-songsOuterContainer.className = 'songs-outer-container'
+songsOuterContainer.className = 'spotext-songs-outer-container'
 
 const topPanel = document.createElement('div')
-topPanel.className = 'top-panel'
+topPanel.className = 'spotext-top-panel'
 
 const closeButton = document.createElement('div')
-closeButton.className = 'close-button'
+closeButton.className = 'spotext-close-button'
 closeButton.textContent = 'Close'
 closeButton.addEventListener('click', () => {
     removeSongsPopup()
 })
 
 const songsContainer = document.createElement('div')
-songsContainer.className = "songs-container"
+songsContainer.className = "spotext-songs-container"
 
 topPanel.appendChild(closeButton)
 
@@ -77,7 +77,8 @@ function inflatePlayers(playersContainer, songIds) {
         player.frameborder = "0";
         player.allowtransparency = "true";
         player.allow = "encrypted-media";
-        player.className = 'song-block'
+        player.style.backgroundColor = 'rgba(0, 0, 0, 0)'
+        player.className = 'spotext-song-block'
         playersContainer.appendChild(player);
     });
 }
