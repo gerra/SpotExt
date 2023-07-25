@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SpotExt",
-  "description": "Effortless music discovery and inline playback!",
-  "version": "1.0",
+  "description": "Just select your artist: Effortless music discovery and inline playback!",
+  "version": "1.2",
   "permissions": ["contextMenus", "storage", "identity", "activeTab"],
   "action": {
     "default_popup": "popup.html",
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "*://*/*"
       ],
       "js": [
         "content.js"
@@ -24,14 +24,10 @@
       ]
     }
   ],
-  "web_accessible_resources": [{
-    "matches": ["<all_urls>"],
-    "resources": ["icons/close_icon.svg"]
-  }],
   "icons": {
-    "16": "icons/spotify16.png",
-    "32": "icons/spotify32.png",
-    "48": "icons/spotify48.png",
-    "128": "icons/spotify128.png"
+    "16": "icons/accordion-16.png",
+    "32": "icons/accordion-32.png",
+    "48": "icons/accordion-48.png",
+    "128": "icons/accordion-128.png"
   }
 }

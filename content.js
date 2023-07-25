@@ -1,3 +1,5 @@
+const EVENT_SELECTED_TEXT_CHANGED = 'selected_text_changed'
+
 const songsOuterContainer = document.createElement('div')
 songsOuterContainer.className = 'spotext-songs-outer-container'
 
@@ -45,6 +47,25 @@ window.onbeforeunload = () => {
     removeSongsPopup()
 }
 
+window.addEventListener("mouseup", () => {
+    chrome.runtime.sendMessage(
+        {
+            event: EVENT_SELECTED_TEXT_CHANGED,
+            selection: getSelectedPlainText(window.getSelection())
+        }
+    )
+});
+
+function getCurrentTabId(onSuccess, onFail) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        if (tabs.length > 0) {
+            onSuccess(tabs[0].id)
+        } else {
+            onFail()
+        }
+    });
+}
+
 function removeSongsPopup() {
     songsOuterContainer.remove()
     songsContainer.replaceChildren();
@@ -62,8 +83,6 @@ function getSelectionCoordinates() {
 }
 
 function inflatePlayers(playersContainer, songIds) {
-    console.log(`inflatePlayers for ${songIds.length}`)
-
     if (songIds.length === 1) {
         playersContainer.style.columnCount = '1'
     } else {
@@ -81,4 +100,20 @@ function inflatePlayers(playersContainer, songIds) {
         player.className = 'spotext-song-block'
         playersContainer.appendChild(player);
     });
+}
+
+function getSelectedPlainText(selection) {
+    let plainText = ""
+    if (selection && selection.rangeCount) {
+        const range = selection.getRangeAt(0)
+        const clonedRange = range.cloneRange()
+        const div = document.createElement("div")
+        div.appendChild(clonedRange.cloneContents())
+        plainText = div.textContent
+    }
+    return removeExtraSpaces(plainText)
+}
+
+function removeExtraSpaces(str) {
+    return str.trim().replace(/\s{2,}/g, ' ')
 }

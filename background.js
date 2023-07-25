@@ -17,16 +17,21 @@ const TRACKS_ENABLED_DEFAULT_VALUE = false
 const EVENT_TRACK_COUNT_CHANGED = 'topTrackCountChanged'
 const EVENT_TRACK_ENABLED_CHANGED = 'topTrackEnabledChanged'
 
+const EVENT_SELECTED_TEXT_CHANGED = 'selected_text_changed'
+
 class SpotifyAuthorizator {
     auth() {
         const redirectUrl = chrome.identity.getRedirectURL();
+	console.log("Identity redirectUrl: " + redirectUrl);
         const authUrl = this.buildAuthUrl(redirectUrl)
+	console.log("Auth Url: " + authUrl);
         return new Promise((resolve, reject) => {
             chrome.identity.launchWebAuthFlow({
                 url: authUrl,
                 interactive: true
             }, function (redirectUrl) {
                 try {
+		    console.log("Got redirectUrl: " + redirectUrl);
                     const accessToken = redirectUrl.match(/access_token=([^&]+)/)[1];
                     resolve(accessToken)
                 } catch (e) {
@@ -136,14 +141,16 @@ class SpotifyService {
 
 const spotifyService = new SpotifyService()
 
-initContextMenuItems()
-function initContextMenuItems() {
+initContextMenuItems(null)
+
+function initContextMenuItems(selectedText) {
     chrome.contextMenus.removeAll(() => {
         initContextMenuItem(
             ARTIST_TRACKS_CONTEXT_MENU_ID,
             KEY_ARTIST_TRACKS_ENABLED,
             ARTIST_TRACKS_ENABLED_DEFAULT_VALUE,
             KEY_ARTIST_TRACK_COUNT,
+            selectedText,
             artistTracksContextMenuTitle
         )
         initContextMenuItem(
@@ -151,23 +158,24 @@ function initContextMenuItems() {
             KEY_TRACKS_ENABLED,
             TRACKS_ENABLED_DEFAULT_VALUE,
             KEY_TRACK_COUNT,
+            selectedText,
             tracksContextMenuTitle
         )
     })
 }
 
-function initContextMenuItem(id, enabledKey, defaultEnabled, trackCountKey, titleFunction) {
+function initContextMenuItem(id, enabledKey, defaultEnabled, trackCountKey, selectedText, titleFunction) {
     getEnabledFromStorage(enabledKey, defaultEnabled)
-        .then(enabled => updateContextMenu(id, enabled, trackCountKey, titleFunction))
+        .then(enabled => updateContextMenu(id, enabled, trackCountKey, selectedText, titleFunction))
 }
 
-function updateContextMenu(id, enabled, trackCountKey, titleFunction) {
+function updateContextMenu(id, enabled, trackCountKey, selectedText, titleFunction) {
     if (enabled) {
         getTracksCountFromStorage(trackCountKey)
             .then(tracksCount => {
                 chrome.contextMenus.create({
                     id: id,
-                    title: titleFunction(tracksCount),
+                    title: titleFunction(tracksCount, selectedText),
                     contexts: ["selection"],
                 });
             })
@@ -178,25 +186,34 @@ function updateContextMenu(id, enabled, trackCountKey, titleFunction) {
     }
 }
 
-function artistTracksContextMenuTitle(count) {
-    return `Show ${count} Tracks of Artist`
+function artistTracksContextMenuTitle(count, selectedText) {
+    if (selectedText != null) {
+        return `Show ${count} Tracks of '${selectedText}'`
+    } else {
+        return `Show ${count} Tracks of Artist`
+    }
 }
 
-function tracksContextMenuTitle(count) {
-    return `Show ${count} Tracks`
+function tracksContextMenuTitle(count, selectedText) {
+    if (selectedText != null) {
+        return `Search ${count} Tracks for '${selectedText}'`
+    } else {
+        return `Show ${count} Tracks`
+    }
 }
 
 chrome.contextMenus.onClicked.addListener((info) => {
     if (info.menuItemId === ARTIST_TRACKS_CONTEXT_MENU_ID) {
-        onTopTracksShowClicked(KEY_ARTIST_TRACK_COUNT, info.selectionText, spotifyService.getTopTracksByArtist)
+        onTopTracksShowClicked(KEY_ARTIST_TRACK_COUNT, removeExtraSpaces(info.selectionText), spotifyService.getTopTracksByArtist)
     } else if (info.menuItemId === TRACKS_CONTEXT_MENU_ID) {
-        onTopTracksShowClicked(KEY_TRACK_COUNT, info.selectionText, spotifyService.getTopTracks)
+        onTopTracksShowClicked(KEY_TRACK_COUNT, removeExtraSpaces(info.selectionText), spotifyService.getTopTracks)
     }
 });
 
 chrome.runtime.onMessage.addListener((message) => {
     tryHandleCountChange(message)
     tryHandleEnableChange(message)
+    tryHandleSelectedTextChange(message)
 });
 
 function tryHandleCountChange(message) {
@@ -224,8 +241,19 @@ function tryHandleEnableChange(message) {
     switch (message.event) {
         case EVENT_ARTIST_TRACK_ENABLED_CHANGED:
         case EVENT_TRACK_ENABLED_CHANGED:
-            initContextMenuItems()
+            initContextMenuItems(null)
             break
+    }
+}
+
+function tryHandleSelectedTextChange(message) {
+    if (message.event === EVENT_SELECTED_TEXT_CHANGED) {
+        const plainText = message.selection
+        if (plainText.length <= 70) {
+            initContextMenuItems(plainText)
+        } else {
+            chrome.contextMenus.removeAll()
+        }
     }
 }
 
@@ -273,4 +301,8 @@ function getCurrentTabId(onSuccess, onFail) {
             onFail()
         }
     });
+}
+
+function removeExtraSpaces(str) {
+    return str.trim().replace(/\s{2,}/g, ' ')
 }
